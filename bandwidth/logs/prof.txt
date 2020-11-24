@@ -1,31 +1,38 @@
-==PROF== Connected to process 19123 (/home/ooreilly/codes/cuda/bandwidth/bandwidth)
+==PROF== Connected to process 24363 (/home/ooreilly/codes/cuda/bandwidth/bandwidth)
 ==PROF== Profiling "readonly_baseline" - 1: 0%....50%....100% - 8 passes
 ==PROF== Profiling "readonly_baseline" - 2: 0%....50%....100% - 8 passes
 ==PROF== Profiling "readonly_float4" - 3: 0%....50%....100% - 8 passes
 ==PROF== Profiling "readonly_gridstride" - 4: 0%....50%....100% - 8 passes
-==PROF== Disconnected from process 19123
-[19123] bandwidth@127.0.0.1
-  void readonly_baseline<float>(float*, unsigned long), 2020-Nov-23 21:58:33, Context 1, Stream 7
+==PROF== Profiling "readonly_gridstride_float4" - 5: 0%....50%....100% - 8 passes
+==PROF== Disconnected from process 24363
+[24363] bandwidth@127.0.0.1
+  void readonly_baseline<float>(float*, unsigned long), 2020-Nov-23 22:30:51, Context 1, Stream 7
     Section: Command line profiler metrics
     ---------------------------------------------------------------------- --------------- ------------------------------
-    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          56.84
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          71.25
     ---------------------------------------------------------------------- --------------- ------------------------------
 
-  void readonly_baseline<double>(double*, unsigned long), 2020-Nov-23 21:58:33, Context 1, Stream 7
+  void readonly_baseline<double>(double*, unsigned long), 2020-Nov-23 22:30:51, Context 1, Stream 7
     Section: Command line profiler metrics
     ---------------------------------------------------------------------- --------------- ------------------------------
-    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          76.92
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          90.15
     ---------------------------------------------------------------------- --------------- ------------------------------
 
-  readonly_float4(float4*, unsigned long), 2020-Nov-23 21:58:33, Context 1, Stream 7
+  readonly_float4(float4*, unsigned long), 2020-Nov-23 22:30:51, Context 1, Stream 7
     Section: Command line profiler metrics
     ---------------------------------------------------------------------- --------------- ------------------------------
-    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          68.04
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          89.98
     ---------------------------------------------------------------------- --------------- ------------------------------
 
-  void readonly_gridstride<float>(float*, unsigned long), 2020-Nov-23 21:58:34, Context 1, Stream 7
+  void readonly_gridstride<float>(float*, unsigned long), 2020-Nov-23 22:30:51, Context 1, Stream 7
     Section: Command line profiler metrics
     ---------------------------------------------------------------------- --------------- ------------------------------
-    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          66.07
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          82.61
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+  readonly_gridstride_float4(float4*, unsigned long), 2020-Nov-23 22:30:52, Context 1, Stream 7
+    Section: Command line profiler metrics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          89.98
     ---------------------------------------------------------------------- --------------- ------------------------------
 

@@ -2,7 +2,7 @@ arch=sm_75
 sm=68
 metrics=gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed
 filename=prof.txt
-n=1e6
+n=1e8
 cmd=./bandwidth $(n)
 flags=-Xptxas -v
 

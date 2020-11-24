@@ -65,16 +65,39 @@ int main(int argc, char **argv) {
                 cudaErrCheck(cudaMemset(u, 0, num_bytes));
 
                 int devID = 0;
-                size_t wavesPerSM = 1;
-                int blocksPerSM = 16; // FIXME: compute this
+                size_t wavesPerSM = 150;
+                int blocksPerSM = 1;
                 int numSMs;
 
                 cudaDeviceGetAttribute(&numSMs, cudaDevAttrMultiProcessorCount, devID);
 
-                dim3 threads ( 64, 1, 1);
+                dim3 threads ( 1024, 1, 1);
                 dim3 blocks ( wavesPerSM * blocksPerSM *  numSMs, 1, 1);
 
                 readonly_gridstride<<<blocks, threads>>>(u, n);
+                cudaFree(u);
+        }
+
+        // Mark Harris's grid stride loop pattern for float4 data
+        {
+                float4 *u;
+                assert(n % 4 == 0);
+                size_t n4 = n / 4;
+                size_t num_bytes = sizeof(float) * n;
+                cudaErrCheck(cudaMalloc((void**)&u, num_bytes));
+                cudaErrCheck(cudaMemset(u, 0, num_bytes));
+
+                int devID = 0;
+                size_t wavesPerSM = 200;
+                int blocksPerSM = 1;
+                int numSMs;
+
+                cudaDeviceGetAttribute(&numSMs, cudaDevAttrMultiProcessorCount, devID);
+
+                dim3 threads ( 1024, 1, 1);
+                dim3 blocks ( wavesPerSM * blocksPerSM *  numSMs, 1, 1);
+
+                readonly_gridstride_float4<<<blocks, threads>>>(u, n4);
                 cudaFree(u);
         }
 }
