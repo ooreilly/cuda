@@ -1,0 +1,13 @@
+==PROF== Connected to process 776 (/home/ooreilly/codes/cuda/latency-hidding/readonly)
+==PROF== Profiling "readonly_float4": 0%....50%....100% - 8 passes
+==PROF== Disconnected from process 776
+[776] readonly@127.0.0.1
+  readonly_float4(float4*, unsigned long), 2020-Nov-25 15:52:53, Context 1, Stream 7
+    Section: Command line profiler metrics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    dram__bytes.sum.per_second                                                Gbyte/second                         585.74
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          89.82
+    gpu__time_active.avg                                                           usecond                         682.98
+    sm__warps_active.avg.per_cycle_active                                             warp                          29.20
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
