@@ -1,10 +1,16 @@
 #pragma once
+#include <cuda_runtime.h>
 
 
 template <typename T>
-__global__ void readonly_baseline(T *in, size_t n) {
+__global__ void readonly_baseline(T *in, size_t n, unsigned int *duration) {
         size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
-        if ( idx < n && in[idx] == (T)1) in[idx] = 1.0;
+
+        if (idx >= n) return;
+        clock_t start = clock();
+        if ( in[idx] == (T)1) in[idx] = 1.0;
+        clock_t end = clock();
+        duration[idx] = end - start;
 }
 
 __global__ void readonly_float4(float4 *in, size_t n) {

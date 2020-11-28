@@ -4,6 +4,24 @@
 #include "readonly.cuh"
 #include "helper.cuh"
 
+const int CLOCK_LATENCY = 80;
+
+template <typename T>
+T max(T *a, int n) {
+        int best = 0;
+        for (int i = 0; i < n; ++i)
+                best = best < a[i] ? a[i] : best;
+        return best;
+}
+
+template <typename T>
+T average(T *a, int n) {
+        int avg = 0;
+        for (int i = 0; i < n; ++i)
+                avg += a[i];
+        return avg / n;
+}
+
 int main(int argc, char **argv) {
 
         if (argc != 3) { 
@@ -18,7 +36,10 @@ int main(int argc, char **argv) {
         {
                 float *u;
                 size_t num_bytes = sizeof(u) * n;
+                unsigned int *h_duration, *d_duration;
                 cudaMalloc((void**)&u, num_bytes);
+                cudaMalloc((void**)&d_duration, sizeof(unsigned int) * n);
+                h_duration = (unsigned int*)malloc(sizeof(unsigned int) * n);
                 cudaMemset(u, 0, num_bytes);
 
                 dim3 threads ( 64, 1, 1);
@@ -33,8 +54,11 @@ int main(int argc, char **argv) {
                     readonly_baseline<float>,
                     cudaFuncAttributePreferredSharedMemoryCarveout, carveout));
 
-                readonly_baseline<float><<<blocks, threads, shared_mem_bytes>>>(u, n);
+                readonly_baseline<float><<<blocks, threads, shared_mem_bytes>>>(u, n, d_duration);
                 cudaFree(u);
+
+                cudaMemcpy(h_duration, d_duration, sizeof(unsigned int) * n, cudaMemcpyDeviceToHost);
+                printf("latency: %d \n", max(h_duration, n) - CLOCK_LATENCY);
         }
         
         {

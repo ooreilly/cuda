@@ -30,7 +30,6 @@ GPU 00000000:01:00.0
 The GTX 2080 Ti has 352-bit wide memory bus. We convert the number of bits to bytes. Since 8 bits = 1 byte, the memory bus is 44 bytes wide.
 
 ## 3. Data transfer rate multiplier
-The GDDR multiplier determines the data transfer rate. 
 The GTX 2080 Ti has GDDR6 memory, having double data transfer rate. The GDDR multiplier is therefore
 2.
 
