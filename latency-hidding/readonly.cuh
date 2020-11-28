@@ -12,6 +12,15 @@ __global__ void readonly_float4(float4 *in, size_t n) {
         if ( idx < n && in[idx].x == 1.0f) in[idx].x = 1.0;
 }
 
+template <int r=1>
+__global__ void readonly_unroll(float *in, size_t n) {
+        size_t idx = r * threadIdx.x + r * blockIdx.x * blockDim.x;
+        #pragma unroll
+        for (int q = 0; q < r; ++q) {
+                if ( idx < n && in[q + idx] == 1.0f) in[q + idx] = 1.0;
+        }
+}
+
 
 template <int r=1>
 __global__ void readonly_float4_unroll(float4 *in, size_t n) {

@@ -36,13 +36,13 @@ GPU 00000000:01:00.0
         Video                             : 1260 MHz.
 ```
 
-2.  I obtained this number from a google search. The GTX 2080 TI has 352-bit wide memory bus.
+2.  I obtained this number from a google search. The GTX 2080 TI has 352-bit wide memory bus, and
+    since 8 bits = 1 byte, it is 44 bytes wide.
 
 3. This card uses GDDR6 memory, (double data transfer rate).
 
 Putting it all together,
 ```
-Memory bandwidth = Memory clock frequency  x (Memory bus width / 8) x GDDR multiplier = 7 GHz x (
-352 / 8 ) x 2 = 616 GB/s.
+Memory bandwidth = Memory clock frequency  x (Memory bus width in bytes) x GDDR multiplier = 7 GHz x 44 bytes x 2 = 616 GB/s.
 ```
 
