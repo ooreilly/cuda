@@ -8,7 +8,7 @@ n=1e8
 cmd=./readonly $(n) $(smem)
 flags=-Xptxas -v 
 
-all: init compile profile
+all: init compile
 
 init:
 	mkdir -p logs

@@ -1,13 +1,5 @@
-==PROF== Connected to process 18638 (/home/ooreilly/codes/cuda/latency-hidding/readonly)
-==PROF== Profiling "readonly_baseline": 0%....50%....100% - 8 passes
-==PROF== Disconnected from process 18638
-[18638] readonly@127.0.0.1
-  void readonly_baseline<float>(float*, unsigned long, unsigned int*), 2020-Nov-28 14:48:51, Context 1, Stream 7
-    Section: Command line profiler metrics
-    ---------------------------------------------------------------------- --------------- ------------------------------
-    dram__bytes.sum.per_second                                                Gbyte/second                         541.08
-    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          82.97
-    gpu__time_active.avg                                                           msecond                           1.48
-    sm__warps_active.avg.per_cycle_active                                             warp                          24.66
-    ---------------------------------------------------------------------- --------------- ------------------------------
-
+==PROF== Connected to process 25053 (/home/ooreilly/codes/cuda/latency-hidding/readonly)
+==PROF== Received signal
+==PROF== Trying to shutdown target application
+==WARNING== No kernels were profiled.
+==WARNING== Profiling kernels launched by child processes requires the --target-processes all option.
