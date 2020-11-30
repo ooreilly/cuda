@@ -1,0 +1,13 @@
+==PROF== Connected to process 16985 (/home/ooreilly/codes/cuda/latency-hidding/readonly_profile)
+==PROF== Profiling "readonly_baseline": 0%....50%....100% - 8 passes
+==PROF== Disconnected from process 16985
+[16985] readonly_profile@127.0.0.1
+  void readonly_baseline<float>(float*, unsigned long, unsigned int*, unsigned int*, unsigned int*, unsigned int*), 2020-Nov-29 18:39:26, Context 1, Stream 7
+    Section: Command line profiler metrics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    dram__bytes.sum.per_second                                                Gbyte/second                         344.66
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          52.85
+    gpu__time_active.avg                                                           msecond                           1.19
+    sm__warps_active.avg.per_cycle_active                                             warp                          15.58
+    ---------------------------------------------------------------------- --------------- ------------------------------
+

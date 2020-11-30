@@ -1,0 +1,8 @@
+==PROF== Connected to process 338 (/home/ooreilly/codes/cuda/latency-hidding/readonly_profile)
+==PROF== Received signal
+==PROF== Trying to shutdown target application
+==ERROR== Error: Failed to prepare kernel for profiling
+==ERROR== Failed to profile kernel "readonly_baseline" in process 338
+==ERROR== An error occurred while trying to profile.
+==WARNING== No kernels were profiled.
+==WARNING== Profiling kernels launched by child processes requires the --target-processes all option.
