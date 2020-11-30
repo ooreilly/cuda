@@ -5,16 +5,20 @@ kernel=readonly_float4
 filename=prof.txt
 smem=0
 n=1e8
-cmd=./readonly $(n) $(smem)
+warps_per_block=2
+cmd=./readonly_profile $(n) $(smem) $(warps_per_block)
 flags=-Xptxas -v 
 
 all: init compile
 
 init:
-	mkdir -p logs
+	mkdir -p logs data figures
 
 compile:
 	nvcc -arch=$(arch) $(flags) readonly.cu -o readonly
+
+compile-profile:
+	nvcc -arch=$(arch) $(flags) -DPROFILE=0 -DWRITE_DATA=0 readonly.cu -o readonly_profile
 
 profile:
 	ncu --log-file logs/$(filename) -k $(kernel) --metrics $(metrics) $(cmd)

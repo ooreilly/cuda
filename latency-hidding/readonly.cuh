@@ -14,27 +14,44 @@ __device__ uint get_smid(void) {
 }
 
 template <typename T>
-__global__ void readonly_baseline(T *in, size_t n, unsigned int *d_start, unsigned int *d_end, unsigned int *warps) {
+__global__ void readonly_baseline(T *in, size_t n, unsigned int *d_start, unsigned int *d_end, unsigned int *d_SMs, unsigned int *d_blocks) {
         size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
 
         if (idx >= n) return;
+        #if PROFILE
         clock_t start = clock();
+        #endif
         if ( in[idx] == (T)1) in[idx] = 1.0;
+        #if PROFILE
         clock_t end = clock();
         size_t warp_idx = threadIdx.x / 32 + blockIdx.x * blockDim.x / 32;
         if (threadIdx.x % 32 == 0) { 
                 d_start[warp_idx] = start;
                 d_end[warp_idx] = end;
-                warps[warp_idx] = get_smid();
+                d_SMs[warp_idx] = get_smid();
+                d_blocks[warp_idx] = blockIdx.x;
         }
+        #endif
 }
 
-__global__ void readonly_float4(float4 *in, size_t n, unsigned int *duration) {
+__global__ void readonly_float4(float4 *in, size_t n, unsigned int *d_start, unsigned int *d_end, unsigned int *d_SMs, unsigned int *d_blocks) {
         size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
+        if (idx >= n) return;
+#if PROFILE
         clock_t start = clock();
-        if ( idx < n && in[idx].x == 1.0f) in[idx].x = 1.0;
+#endif
+        float4 reg = in[idx];
+        if (reg.x == 1.0f || reg.y == 1.0f || reg.z == 1.0f || reg.w == 1.0f) in[idx].x = 1.0f;
+        #if PROFILE
         clock_t end = clock();
-        duration[idx] = end - start;
+        size_t warp_idx = threadIdx.x / 32 + blockIdx.x * blockDim.x / 32;
+        if (threadIdx.x % 32 == 0) { 
+                d_start[warp_idx] = start;
+                d_end[warp_idx] = end;
+                d_SMs[warp_idx] = get_smid();
+                d_blocks[warp_idx] = blockIdx.x;
+        }
+        #endif
 }
 
 template <int r=1>

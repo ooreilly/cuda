@@ -1,5 +1,13 @@
-==PROF== Connected to process 25053 (/home/ooreilly/codes/cuda/latency-hidding/readonly)
-==PROF== Received signal
-==PROF== Trying to shutdown target application
-==WARNING== No kernels were profiled.
-==WARNING== Profiling kernels launched by child processes requires the --target-processes all option.
+==PROF== Connected to process 32188 (/home/ooreilly/codes/cuda/latency-hidding/readonly_profile)
+==PROF== Profiling "readonly_float4": 0%....50%....100% - 8 passes
+==PROF== Disconnected from process 32188
+[32188] readonly_profile@127.0.0.1
+  readonly_float4(float4*, unsigned long, unsigned int*, unsigned int*, unsigned int*, unsigned int*), 2020-Nov-29 21:08:34, Context 1, Stream 7
+    Section: Command line profiler metrics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    dram__bytes.sum.per_second                                                Gbyte/second                         585.19
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          89.74
+    gpu__time_active.avg                                                           usecond                         683.55
+    sm__warps_active.avg.per_cycle_active                                             warp                          26.86
+    ---------------------------------------------------------------------- --------------- ------------------------------
+

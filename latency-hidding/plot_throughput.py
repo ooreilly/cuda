@@ -3,9 +3,11 @@ import sys
 import numpy as np
 
 kernel = sys.argv[1]
-numloads = int(sys.argv[2])
+mem_latency_cpi = int(sys.argv[2])
+num_loads = int(sys.argv[3])
+out = sys.argv[4]
 
-data = np.loadtxt("data/%s.txt" % kernel)
+data = np.loadtxt(kernel)
 x = data[:,0]
 y = data[:,1]
 plt.plot(x, y, "o")
@@ -13,17 +15,12 @@ plt.plot(x, y, "o")
 # latency in clock cycles (CPI)
 clock = 1.350 # GHz
 numSMs = 68
-if numloads == 4:
-    mem_latency_cpi = 480
-else:
-    mem_latency_cpi = 375
 mem_latency_time = mem_latency_cpi / clock
 occ = np.linspace(0, max(x), 100)
-bound = [min(numloads * numSMs * 128 * xi / mem_latency_time, 616) for xi in occ]
+bound = [min(num_loads * numSMs * 128 * xi / mem_latency_time, 616) for xi in occ]
 
 plt.plot(occ, bound, "k-")
 plt.xlabel("warps/SM")
 plt.ylabel("GB/s")
-plt.show()
-plt.savefig("figures/%s.svg" % kernel)
+plt.savefig(out)
 
