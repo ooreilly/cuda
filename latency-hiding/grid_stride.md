@@ -12,3 +12,4 @@ The idea behind this pattern is to launch a fixed number of blocks and loop insi
 
 ### Disadvantages
 * Requires a small number of extra registers compared to the standard approach (4 extra registers)
+

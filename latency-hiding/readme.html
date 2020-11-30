@@ -1,0 +1,44 @@
+<h1 id="readme">README</h1>
+<p>This directory contains some scripts for experimentally measuring memory latency, and for estimating memory throughput bounds.</p>
+<h2 id="estimating-memory-latency">Estimating memory latency</h2>
+<p>Each kernel contains timing instructions for experimentally measuring memory access latency. Each warp records the start time immediately before the instruction and afterwards. These times are obtained using the SM clock. Since each SM has a different clock, we adjust the start times so that the warp with the lowest start time gets set to zero for each SM. We also record the block IDs and warp IDs that get executed on a given SM.</p>
+<h3 id="latency-plots">Latency plots</h3>
+<p>In the figures below, each line represents a warp. The length of a line is the measured latency in clock cycles taken to execute the instructions. The colors show what SM each warp executes on. The colors for SMs 1-4 are: blue, orange, green, red. Blocks are represented by different shades, and the first warp in a block is colored black.</p>
+<h2 id="read-only-kernel">Read-only kernel</h2>
+<p>In these experiments, we load a variable number of floating point values per thread and measure the global memory access latency. The amount of data each thread loads is listed below. * float : load a single value. * float4 : load four floating point values using a vectorized load instruction.</p>
+<h3 id="float">Float</h3>
+<table>
+<thead>
+<tr class="header">
+<th><img src="figures/warps_readonly_baseline_2.svg" /></th>
+<th><img src="figures/warps_readonly_baseline_4.svg" /></th>
+<th><img src="figures/warps_readonly_baseline_8.svg" /></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>2 Warps per block</em></td>
+<td><em>4 Warps per block</em></td>
+<td><em>8 Warps per block</em></td>
+</tr>
+</tbody>
+</table>
+<p><em>Global memory access latency per warp when loading one floating-point value per thread</em></p>
+<h3 id="float4">Float4</h3>
+<table>
+<thead>
+<tr class="header">
+<th><img src="figures/warps_readonly_float4_2.svg" /></th>
+<th><img src="figures/warps_readonly_float4_4.svg" /></th>
+<th><img src="figures/warps_readonly_float4_8.svg" /></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>2 Warps per block</em></td>
+<td><em>4 Warps per block</em></td>
+<td><em>8 Warps per block</em></td>
+</tr>
+</tbody>
+</table>
+<p><em>Global memory access latency per warp when loading one floating-point value per thread</em></p>
