@@ -92,40 +92,6 @@ When each thread loads 4 floating-point values at a time,
 *Estimated throughput bounds using Little's law and global read memory access latency measurements
 (lower bound: 1000 CPI).*
 
-## Coalesced vs Non-coalesced global memory accesses
-
-In the previous examples, each thread accessed either 4 bytes of 16 bytes of data. Since the
-accesses were coalesced each warp requested a single memory transaction that filled 128 bytes of
-data. Global memory accesses are 4, 32, or 128 bytes wide transactions. These transactions must be aligned (memory addresses for each access must a multiple of the transaction size). Now, we modify the access pattern so that we read in `a[c[i]]` where `c` is an array that
-contains integer values ranging from `0` to `n` (the length of the arrays `a`, and `c`). If `c[i] =
-i`, the access pattern is the same as before, and all memory reads are coalesced. On the other hand,
-if we randomly permute the elements in `c`, the access pattern diverges. In the worst case scenario,
-each thread must request either a separate memory instruction 128
-B wide (4 sectors, or one cache line). This increase in the number of memory instructions causes the warp throughput to
-substantially decrease compared to the coalesced case. In the coalesced case, the amount of data
-loaded is `2 x 128` B per warp. In the divergent case, the number of bytes increases to `128 + 32 x 32` or `128 + 32 x 128` B per warp. As a result, the warp throughput reduces by a
-  factor of 4.5 or 16.5.
-
-| ![](figures/warps_readonly_random_access_2.svg) | ![](figures/warps_readonly_random_access_4.svg) |
-|---|---|
-| *2 Warps per block*                        | *4 Warps per block*                        |
-| ![](figures/warps_readonly_random_access_8.svg) | ![](figures/warps_readonly_random_access_16.svg) |
-| *8 Warps per block* | *16 Warps per block* |
-
-*Global memory access latency per warp for a divergent memory access pattern that loads one floating-point value per thread*
-
-| ![](figures/throughput_readonly_nondiverging_4.svg) | ![](figures/throughput_readonly_diverging_4.svg) |
-|---|---|
-| *Coaleshed global memory accesses* | *Diverging global memory accesses* |
-
-
-When `n = 1e8`, the divergent kernel requests a total of 4 GB from L1 cache,  whereas the coalesced kernel requests a total of 800 MB from L1 cache. Hence, the divergent kernels accesses 5 times as much data as the coalesced kernel - in agreement with theory. The total execution time of each kernel was 30.2 ms for the divergent kernel and 1.56 ms for the  coaalesced kernel, yielding ratio of ~20.
-
-The coalesced kernel loads 25 M sectors. 25 M sectors equals 800 MB, which is optimal. The divergent
-kernel loads 112 M sectors and therefore runs at 22 % efficiency. If we do a back of the envelope
-calculation, we see that the coalesced kernel achieves 512 GB/s and the divergent kernel achieves
-120 GB/s. 
-
 ## Strided memory accesses
 In this example, we look at how warp throughput deteriorates when reading an array using a strided
 access pattern. The access pattern is `a[stride * i % n]`, the modulo operator makes sure that the
