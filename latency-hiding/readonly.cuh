@@ -13,7 +13,7 @@ __device__ uint get_smid(void) {
 
 }
 
-template <typename T>
+template <int stride, typename T>
 __global__ void readonly_baseline(T *in, size_t n, unsigned int *d_start, unsigned int *d_end, unsigned int *d_SMs, unsigned int *d_blocks) {
         size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -21,7 +21,7 @@ __global__ void readonly_baseline(T *in, size_t n, unsigned int *d_start, unsign
         #if PROFILE
         clock_t start = clock();
         #endif
-        if ( in[idx] == (T)1) in[idx] = 1.0;
+        if ( in[stride * idx % n] == (T)1) in[idx] = 1.0;
         #if PROFILE
         clock_t end = clock();
         size_t warp_idx = threadIdx.x / 32 + blockIdx.x * blockDim.x / 32;
@@ -34,13 +34,14 @@ __global__ void readonly_baseline(T *in, size_t n, unsigned int *d_start, unsign
         #endif
 }
 
+template<int stride>
 __global__ void readonly_float4(float4 *in, size_t n, unsigned int *d_start, unsigned int *d_end, unsigned int *d_SMs, unsigned int *d_blocks) {
         size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
         if (idx >= n) return;
 #if PROFILE
         clock_t start = clock();
 #endif
-        float4 reg = in[idx];
+        float4 reg = in[stride * idx % n];
         if (reg.x == 1.0f || reg.y == 1.0f || reg.z == 1.0f || reg.w == 1.0f) in[idx].x = 1.0f;
         #if PROFILE
         clock_t end = clock();

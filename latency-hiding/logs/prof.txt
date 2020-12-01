@@ -1,13 +1,91 @@
-==PROF== Connected to process 32188 (/home/ooreilly/codes/cuda/latency-hidding/readonly_profile)
+==PROF== Connected to process 17376 (/home/ooreilly/codes/cuda/latency-hiding/readonly_profile)
 ==PROF== Profiling "readonly_float4": 0%....50%....100% - 8 passes
-==PROF== Disconnected from process 32188
-[32188] readonly_profile@127.0.0.1
-  readonly_float4(float4*, unsigned long, unsigned int*, unsigned int*, unsigned int*, unsigned int*), 2020-Nov-29 21:08:34, Context 1, Stream 7
+==PROF== Profiling "readonly_float4": 0%....50%....100% - 8 passes
+==PROF== Profiling "readonly_float4": 0%....50%....100% - 8 passes
+==PROF== Profiling "readonly_float4": 0%....50%....100% - 8 passes
+==PROF== Profiling "readonly_float4": 0%....50%....100% - 8 passes
+==PROF== Profiling "readonly_float4": 0%....50%....100% - 8 passes
+==PROF== Profiling "readonly_float4": 0%....50%....100% - 8 passes
+==PROF== Profiling "readonly_float4": 0%....50%....100% - 8 passes
+==PROF== Disconnected from process 17376
+[17376] readonly_profile@127.0.0.1
+  void readonly_float4<1>(float4*, unsigned long, unsigned int*, unsigned int*, unsigned int*, unsigned int*), 2020-Dec-01 15:05:56, Context 1, Stream 7
     Section: Command line profiler metrics
     ---------------------------------------------------------------------- --------------- ------------------------------
-    dram__bytes.sum.per_second                                                Gbyte/second                         585.19
-    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          89.74
-    gpu__time_active.avg                                                           usecond                         683.55
-    sm__warps_active.avg.per_cycle_active                                             warp                          26.86
+    dram__bytes.sum.per_second                                                Gbyte/second                         567.17
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          87.08
+    gpu__time_active.avg                                                           usecond                          70.56
+    l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum                                  sector                      1,250,000
+    sm__warps_active.avg.per_cycle_active                                             warp                          28.80
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+  void readonly_float4<2>(float4*, unsigned long, unsigned int*, unsigned int*, unsigned int*, unsigned int*), 2020-Dec-01 15:05:56, Context 1, Stream 7
+    Section: Command line profiler metrics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    dram__bytes.sum.per_second                                                Gbyte/second                         575.91
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          88.95
+    gpu__time_active.avg                                                           usecond                         139.62
+    l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum                                  sector                      2,500,000
+    sm__warps_active.avg.per_cycle_active                                             warp                          30.12
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+  void readonly_float4<4>(float4*, unsigned long, unsigned int*, unsigned int*, unsigned int*, unsigned int*), 2020-Dec-01 15:05:56, Context 1, Stream 7
+    Section: Command line profiler metrics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    dram__bytes.sum.per_second                                                Gbyte/second                         581.76
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          89.40
+    gpu__time_active.avg                                                           usecond                         275.39
+    l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum                                  sector                      2,500,000
+    sm__warps_active.avg.per_cycle_active                                             warp                          29.96
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+  void readonly_float4<8>(float4*, unsigned long, unsigned int*, unsigned int*, unsigned int*, unsigned int*), 2020-Dec-01 15:05:56, Context 1, Stream 7
+    Section: Command line profiler metrics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    dram__bytes.sum.per_second                                                Gbyte/second                         584.30
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          89.34
+    gpu__time_active.avg                                                           usecond                         274.98
+    l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum                                  sector                      2,500,000
+    sm__warps_active.avg.per_cycle_active                                             warp                          28.07
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+  void readonly_float4<16>(float4*, unsigned long, unsigned int*, unsigned int*, unsigned int*, unsigned int*), 2020-Dec-01 15:05:56, Context 1, Stream 7
+    Section: Command line profiler metrics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    dram__bytes.sum.per_second                                                Gbyte/second                         582.07
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          89.37
+    gpu__time_active.avg                                                           usecond                         275.49
+    l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum                                  sector                      2,500,000
+    sm__warps_active.avg.per_cycle_active                                             warp                          28.09
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+  void readonly_float4<32>(float4*, unsigned long, unsigned int*, unsigned int*, unsigned int*, unsigned int*), 2020-Dec-01 15:05:56, Context 1, Stream 7
+    Section: Command line profiler metrics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    dram__bytes.sum.per_second                                                Gbyte/second                         491.89
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          75.36
+    gpu__time_active.avg                                                           usecond                         316.29
+    l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum                                  sector                      2,500,000
+    sm__warps_active.avg.per_cycle_active                                             warp                          28.30
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+  void readonly_float4<64>(float4*, unsigned long, unsigned int*, unsigned int*, unsigned int*, unsigned int*), 2020-Dec-01 15:05:56, Context 1, Stream 7
+    Section: Command line profiler metrics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    dram__bytes.sum.per_second                                                Gbyte/second                         265.26
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          39.99
+    gpu__time_active.avg                                                           usecond                         591.17
+    l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum                                  sector                      2,500,000
+    sm__warps_active.avg.per_cycle_active                                             warp                          28.31
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+  void readonly_float4<128>(float4*, unsigned long, unsigned int*, unsigned int*, unsigned int*, unsigned int*), 2020-Dec-01 15:05:56, Context 1, Stream 7
+    Section: Command line profiler metrics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    dram__bytes.sum.per_second                                                Gbyte/second                         296.27
+    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                          45.49
+    gpu__time_active.avg                                                           usecond                         521.89
+    l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum                                  sector                      2,500,000
+    sm__warps_active.avg.per_cycle_active                                             warp                          28.48
     ---------------------------------------------------------------------- --------------- ------------------------------
 

@@ -2,9 +2,15 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "helper.cuh"
+#include <bits/stdc++.h>
+using namespace std;
 
 #ifndef WRITE_DATA
 #define WRITE_DATA 1
+#endif
+
+#ifndef STRIDED_ACCESS
+#define STRIDED_ACCESS 1
 #endif
 
 #ifndef PROFILE
@@ -60,6 +66,7 @@ void write(const char *filename, unsigned int *start, unsigned int *end,
         printf("Wrote: %s \n", filename);
 }
 
+template <int stride>
 void run_readonly_baseline(int n, unsigned int shared_mem_bytes, unsigned int warps_per_block) {
         // arrays for profiling
         unsigned int *d_start, *d_end, *d_SMs, *d_blocks;
@@ -84,19 +91,21 @@ void run_readonly_baseline(int n, unsigned int shared_mem_bytes, unsigned int wa
         dim3 blocks((n - 1) / threads.x + 1, 1, 1);
 
         int maxbytes = 65536;  // 64 KB
-        cudaFuncSetAttribute(readonly_baseline<float>,
+        cudaFuncSetAttribute(readonly_baseline<stride, float>,
                              cudaFuncAttributeMaxDynamicSharedMemorySize,
                              maxbytes);
         int carveout = cudaSharedmemCarveoutMaxShared;
         cudaErrCheck(cudaFuncSetAttribute(
-            readonly_baseline<float>,
+            readonly_baseline<stride, float>,
             cudaFuncAttributePreferredSharedMemoryCarveout, carveout));
 
-        readonly_baseline<float><<<blocks, threads, shared_mem_bytes>>>(
+        readonly_baseline<stride, float><<<blocks, threads, shared_mem_bytes>>>(
             u, n, d_start, d_end, d_SMs, d_blocks);
         cudaFree(u);
 
-        write("data/readonly_baseline.bin", d_start, d_end, d_SMs, d_blocks,
+        char filename[2048];
+        sprintf(filename, "data/readonly_baseline_stride_%d_warps_%d.bin", stride, warps_per_block);
+        write(filename, d_start, d_end, d_SMs, d_blocks,
               num_bytes);
 
         cudaFree(d_start);
@@ -105,6 +114,7 @@ void run_readonly_baseline(int n, unsigned int shared_mem_bytes, unsigned int wa
         cudaFree(d_blocks);
 }
 
+template <int stride>
 void run_readonly_float4(int n, unsigned int shared_mem_bytes,
                          unsigned int warps_per_block) {
 
@@ -133,21 +143,24 @@ void run_readonly_float4(int n, unsigned int shared_mem_bytes,
         dim3 blocks((n4 - 1) / threads.x + 1, 1, 1);
 
         int maxbytes = 65536;  // 64 KB
-        cudaFuncSetAttribute(readonly_float4,
+        cudaFuncSetAttribute(readonly_float4<stride>,
                              cudaFuncAttributeMaxDynamicSharedMemorySize,
                              maxbytes);
         int carveout = cudaSharedmemCarveoutMaxShared;
         cudaErrCheck(cudaFuncSetAttribute(
-            readonly_float4, cudaFuncAttributePreferredSharedMemoryCarveout,
+            readonly_float4<stride>, cudaFuncAttributePreferredSharedMemoryCarveout,
             carveout));
 
-        readonly_float4<<<blocks, threads, shared_mem_bytes>>>(
+        readonly_float4<stride><<<blocks, threads, shared_mem_bytes>>>(
             u, n4, d_start, d_end, d_SMs, d_blocks);
         cudaFree(u);
 
-        write("data/readonly_float4.bin", d_start, d_end, d_SMs, d_blocks,
+        char filename[2048];
+        sprintf(filename, "data/readonly_float4_stride_%d_warps_%d.bin", stride, warps_per_block);
+        write(filename, d_start, d_end, d_SMs, d_blocks,
               num_bytes);
 }
+
 
 int main(int argc, char **argv) {
 
@@ -164,8 +177,29 @@ int main(int argc, char **argv) {
                         n, shared_mem_bytes, warps_per_block);
 
 
-        run_readonly_baseline(n, shared_mem_bytes, warps_per_block);
-        run_readonly_float4(n, shared_mem_bytes, warps_per_block);
+        if (STRIDED_ACCESS) {
+                printf("running with strided accesses...\n");
+                run_readonly_baseline<1>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_baseline<2>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_baseline<4>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_baseline<8>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_baseline<16>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_baseline<32>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_baseline<64>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_baseline<128>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_float4<1>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_float4<2>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_float4<4>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_float4<8>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_float4<16>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_float4<32>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_float4<64>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_float4<128>(n, shared_mem_bytes, warps_per_block);
+        }
+        else {
+                run_readonly_baseline<1>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_float4<1>(n, shared_mem_bytes, warps_per_block);
+        }
         
         /*
         {
