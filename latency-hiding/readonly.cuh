@@ -42,7 +42,7 @@ __global__ void readonly_float4(float4 *in, size_t n, unsigned int *d_start, uns
         clock_t start = clock();
 #endif
         float4 reg = in[stride * idx % n];
-        if (reg.x == 1.0f || reg.y == 1.0f || reg.z == 1.0f || reg.w == 1.0f) in[idx].x = 1.0f;
+        if (reg.x == 1.0f) in[idx].x = 1.0f;
         #if PROFILE
         clock_t end = clock();
         size_t warp_idx = threadIdx.x / 32 + blockIdx.x * blockDim.x / 32;
@@ -53,6 +53,14 @@ __global__ void readonly_float4(float4 *in, size_t n, unsigned int *d_start, uns
                 d_blocks[warp_idx] = blockIdx.x;
         }
         #endif
+}
+
+template<int stride>
+__global__ void readonly_float4_simple(float4 *in, size_t n) { 
+        size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
+        if (idx >= n) return;
+        float4 reg = in[idx];
+        if (reg.x == 1.0f) in[idx].x = 1.0f;
 }
 
 template <int r=1>

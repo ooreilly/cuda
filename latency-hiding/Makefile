@@ -15,7 +15,7 @@ init:
 	mkdir -p logs data figures
 
 compile:
-	nvcc -arch=$(arch) $(flags) readonly.cu -o readonly
+	nvcc -arch=$(arch) $(flags) -DPROFILE=0 -DWRITE_DATA=0 -DSTRIDED_ACCESS=0 readonly.cu -o readonly
 
 compile-profile:
 	nvcc -arch=$(arch) $(flags) -DPROFILE=0 -DWRITE_DATA=0 -DSTRIDED_ACCESS=0 readonly.cu -o readonly_profile

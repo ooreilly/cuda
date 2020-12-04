@@ -1,3 +1,7 @@
-==ERROR== The application returned an error code (255).
+==PROF== Received signal
+==PROF== Trying to shutdown target application
+==ERROR== Failed to get connected session on port 49152.
+==ERROR== Failed to create profiling session.
+==ERROR== An error occurred while trying to profile.
 ==WARNING== No kernels were profiled.
 ==WARNING== Profiling kernels launched by child processes requires the --target-processes all option.

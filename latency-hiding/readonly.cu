@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "helper.cuh"
 #include <bits/stdc++.h>
+#include <sys/time.h>
 using namespace std;
 
 #ifndef WRITE_DATA
@@ -35,6 +36,26 @@ T average(T *a, int n) {
         return avg / n;
 }
 
+double compute_latency(unsigned int *start, unsigned int *end, size_t num_bytes)
+{
+
+        unsigned int *h_start = (unsigned int*)malloc(num_bytes);
+        unsigned int *h_end = (unsigned int*)malloc(num_bytes);
+
+        cudaMemcpy(h_start, start, num_bytes, cudaMemcpyDeviceToHost);
+        cudaMemcpy(h_end, end, num_bytes, cudaMemcpyDeviceToHost);
+
+        int n = num_bytes / sizeof(unsigned int) / 32;
+        double avg_latency = 0;
+        for (int i = 0; i < n; ++i)
+                avg_latency += h_end[i] - h_start[i];
+        printf("latency: %g clocks \n", avg_latency / n);
+        double clock = 1.35; // GHz
+        avg_latency = avg_latency / n / clock; // time in ns
+        return avg_latency;
+
+}
+
 void write(const char *filename, unsigned int *start, unsigned int *end,
            unsigned int *SMs, unsigned int *blocks, size_t num_bytes) {
 
@@ -48,6 +69,7 @@ void write(const char *filename, unsigned int *start, unsigned int *end,
         cudaMemcpy(h_end, end, num_bytes, cudaMemcpyDeviceToHost);
         cudaMemcpy(h_SMs, SMs, num_bytes, cudaMemcpyDeviceToHost);
         cudaMemcpy(h_blocks, blocks, num_bytes, cudaMemcpyDeviceToHost);
+
 
         int n = num_bytes / sizeof(unsigned int) / 32;
         FILE *fh = fopen(filename, "wb");
@@ -101,13 +123,13 @@ void run_readonly_baseline(int n, unsigned int shared_mem_bytes, unsigned int wa
 
         readonly_baseline<stride, float><<<blocks, threads, shared_mem_bytes>>>(
             u, n, d_start, d_end, d_SMs, d_blocks);
-        cudaFree(u);
 
         char filename[2048];
         sprintf(filename, "data/readonly_baseline_stride_%d_warps_%d.bin", stride, warps_per_block);
         write(filename, d_start, d_end, d_SMs, d_blocks,
               num_bytes);
 
+        cudaFree(u);
         cudaFree(d_start);
         cudaFree(d_end);
         cudaFree(d_SMs);
@@ -133,6 +155,11 @@ void run_readonly_float4(int n, unsigned int shared_mem_bytes,
         cudaMemset(d_end, 0, num_bytes);
         cudaMemset(d_SMs, 0, num_bytes);
         cudaMemset(d_blocks, 0, num_bytes);
+ 
+        cudaEvent_t start, stop;
+        cudaEventCreate(&start);
+        cudaEventCreate(&stop);
+ 
 
         float4 *u;
         size_t fnum_bytes = sizeof(float4) * n4;
@@ -151,14 +178,160 @@ void run_readonly_float4(int n, unsigned int shared_mem_bytes,
             readonly_float4<stride>, cudaFuncAttributePreferredSharedMemoryCarveout,
             carveout));
 
+        //struct timeval start, stop;
+        //gettimeofday(&start, nullptr);
+        cudaEventRecord(start);
         readonly_float4<stride><<<blocks, threads, shared_mem_bytes>>>(
             u, n4, d_start, d_end, d_SMs, d_blocks);
+        cudaEventRecord(stop);
+
+        cudaEventSynchronize(stop);
+        float ms = 0;
+        cudaEventElapsedTime(&ms, start, stop);
+        cudaDeviceSynchronize();
+        //gettimeofday(&stop, nullptr);
+        //int usecs = stop.tv_usec - start.tv_usec;
+        printf("time = %f ms \n", ms);
         cudaFree(u);
+        double bandwidth = fnum_bytes / (ms * 1e6);
+
+        int maxActiveBlocks;
+        cudaOccupancyMaxActiveBlocksPerMultiprocessor( &maxActiveBlocks, 
+                                                 readonly_float4<stride>, 32 * warps_per_block, 
+                                                 shared_mem_bytes);
+        int cache_lines = 32/ (128 / 16) * warps_per_block * maxActiveBlocks;
+        double latency =  compute_latency(d_start, d_end, num_bytes);
+        int numSMs = 0;
+        cudaDeviceGetAttribute(&numSMs, cudaDevAttrMultiProcessorCount, 0);
+        //double bandwidth =  numSMs * 128 * cache_lines / latency;
+        printf(
+            "shared memory: %7d B \t occupancy: %-2d warps, \t cache lines: "
+            "%-3d bandwidth: %g GB/s \n",
+            shared_mem_bytes, maxActiveBlocks * warps_per_block, cache_lines,
+            bandwidth);
 
         char filename[2048];
         sprintf(filename, "data/readonly_float4_stride_%d_warps_%d.bin", stride, warps_per_block);
         write(filename, d_start, d_end, d_SMs, d_blocks,
               num_bytes);
+}
+
+template <int stride>
+void run_readonly_float4_simple(int n, unsigned int shared_mem_bytes,
+                         unsigned int warps_per_block) {
+
+        assert(n % 4 == 0);
+        size_t n4 = n / 4;
+
+        size_t num_bytes = sizeof(unsigned int) * n4;
+ 
+        cudaEvent_t start, stop;
+        cudaEventCreate(&start);
+        cudaEventCreate(&stop);
+ 
+
+        float4 *u;
+        size_t fnum_bytes = sizeof(float4) * n4;
+        cudaErrCheck(cudaMalloc((void **)&u, fnum_bytes));
+        cudaErrCheck(cudaMemset(u, 0, fnum_bytes));
+
+        dim3 threads(warps_per_block * 32, 1, 1);
+        dim3 blocks((n4 - 1) / threads.x + 1, 1, 1);
+
+        int maxbytes = 65536;  // 64 KB
+        cudaFuncSetAttribute(readonly_float4_simple<stride>,
+                             cudaFuncAttributeMaxDynamicSharedMemorySize,
+                             maxbytes);
+        int carveout = cudaSharedmemCarveoutMaxShared;
+        cudaErrCheck(cudaFuncSetAttribute(
+            readonly_float4_simple<stride>, cudaFuncAttributePreferredSharedMemoryCarveout,
+            carveout));
+
+        cudaEventRecord(start);
+        readonly_float4_simple<stride><<<blocks, threads, shared_mem_bytes>>>(
+            u, n4);
+        cudaEventRecord(stop);
+
+        cudaEventSynchronize(stop);
+        float ms = 0;
+        cudaEventElapsedTime(&ms, start, stop);
+        cudaDeviceSynchronize();
+        printf("time = %f ms \n", ms);
+        cudaFree(u);
+        double bandwidth = fnum_bytes / (ms * 1e6);
+
+        int maxActiveBlocks;
+        cudaOccupancyMaxActiveBlocksPerMultiprocessor( &maxActiveBlocks, 
+                                                 readonly_float4_simple<stride>, 32 * warps_per_block, 
+                                                 shared_mem_bytes);
+        int cache_lines = 32/ (128 / 16) * warps_per_block * maxActiveBlocks;
+        int numSMs = 0;
+        cudaDeviceGetAttribute(&numSMs, cudaDevAttrMultiProcessorCount, 0);
+        printf(
+            "shared memory: %7d B \t occupancy: %-2d warps, \t cache lines: "
+            "%-3d bandwidth: %g GB/s \n",
+            shared_mem_bytes, maxActiveBlocks * warps_per_block, cache_lines,
+            bandwidth);
+}
+
+template <int stride>
+void run_readonly_float4_gridstride(int n, unsigned int shared_mem_bytes,
+                         unsigned int warps_per_block) {
+
+        assert(n % 4 == 0);
+        size_t n4 = n / 4;
+
+ 
+        cudaEvent_t start, stop;
+        cudaEventCreate(&start);
+        cudaEventCreate(&stop);
+ 
+
+        float4 *u;
+        size_t fnum_bytes = sizeof(float4) * n4;
+        cudaErrCheck(cudaMalloc((void **)&u, fnum_bytes));
+        cudaErrCheck(cudaMemset(u, 0, fnum_bytes));
+
+
+        int maxbytes = 65536;  // 64 KB
+        cudaFuncSetAttribute(readonly_gridstride_float4,
+                             cudaFuncAttributeMaxDynamicSharedMemorySize,
+                             maxbytes);
+        int carveout = cudaSharedmemCarveoutMaxShared;
+        cudaErrCheck(cudaFuncSetAttribute(
+            readonly_gridstride_float4, cudaFuncAttributePreferredSharedMemoryCarveout,
+            carveout));
+
+        int maxActiveBlocks;
+        cudaOccupancyMaxActiveBlocksPerMultiprocessor( &maxActiveBlocks, 
+                                                 readonly_gridstride_float4, 32 * warps_per_block, 
+                                                 shared_mem_bytes);
+
+        int numSMs = 0;
+        cudaDeviceGetAttribute(&numSMs, cudaDevAttrMultiProcessorCount, 0);
+
+        int numWaves = 4;
+        dim3 threads(warps_per_block * 32, 1, 1);
+        dim3 blocks(maxActiveBlocks * numSMs * numWaves, 1, 1);
+        cudaEventRecord(start);
+        readonly_gridstride_float4<<<blocks, threads, shared_mem_bytes>>>(
+            u, n4);
+        cudaEventRecord(stop);
+
+        cudaEventSynchronize(stop);
+        float ms = 0;
+        cudaEventElapsedTime(&ms, start, stop);
+        cudaDeviceSynchronize();
+        printf("time = %f ms \n", ms);
+        cudaFree(u);
+        double bandwidth = fnum_bytes / (ms * 1e6);
+
+        int cache_lines = 32/ (128 / 16) * warps_per_block * maxActiveBlocks;
+        printf(
+            "shared memory: %7d B \t occupancy: %-2d warps, \t cache lines: "
+            "%-3d bandwidth: %g GB/s \n",
+            shared_mem_bytes, maxActiveBlocks * warps_per_block, cache_lines,
+            bandwidth);
 }
 
 
@@ -197,35 +370,9 @@ int main(int argc, char **argv) {
                 run_readonly_float4<128>(n, shared_mem_bytes, warps_per_block);
         }
         else {
-                run_readonly_baseline<1>(n, shared_mem_bytes, warps_per_block);
-                run_readonly_float4<1>(n, shared_mem_bytes, warps_per_block);
+                //run_readonly_baseline<1>(n, shared_mem_bytes, warps_per_block);
+                //run_readonly_float4_simple<1>(n, shared_mem_bytes, warps_per_block);
+                run_readonly_float4_gridstride<1>(n, shared_mem_bytes, warps_per_block);
         }
-        
-        /*
-        {
-                float *u;
-                size_t num_bytes = sizeof(u) * n;
-                cudaMalloc((void**)&u, num_bytes);
-                cudaMemset(u, 0, num_bytes);
-
-                const int unroll = 4;
-                dim3 threads ( 64, 1, 1);
-                dim3 blocks ( (n / unroll - 1) / threads.x + 1, 1, 1);
-
-                int maxbytes = 65536;  // 64 KB
-                cudaFuncSetAttribute(
-                    readonly_unroll<unroll>,
-                    cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
-                int carveout = cudaSharedmemCarveoutMaxShared;
-                cudaErrCheck(cudaFuncSetAttribute(
-                    readonly_unroll<unroll>,
-                    cudaFuncAttributePreferredSharedMemoryCarveout, carveout));
-
-                readonly_unroll<unroll><<<blocks, threads, shared_mem_bytes>>>(u, n);
-                cudaFree(u);
-        }
-
-        // Float 4 kernel
-        */
 
 }

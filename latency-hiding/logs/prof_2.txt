@@ -1,14 +1,5 @@
-==PROF== Connected to process 14381 (/home/ooreilly/codes/cuda/latency-hiding/readonly_profile)
-==PROF== Profiling "readonly_baseline": 0%....50%....100% - 8 passes
+==PROF== Connected to process 15528 (/home/ooreilly/codes/cuda/latency-hiding/readonly_profile)
 ==PROF== Received signal
 ==PROF== Trying to shutdown target application
-[14381] readonly_profile@127.0.0.1
-  void readonly_baseline<float>(float*, unsigned long, unsigned int*, unsigned int*, unsigned int*, unsigned int*), 2020-Nov-29 23:18:18, Context 1, Stream 7
-    Section: Command line profiler metrics
-    ---------------------------------------------------------------------- --------------- ------------------------------
-    dram__bytes.sum.per_second                                                Gbyte/second                          36.42
-    gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed                     %                           5.58
-    gpu__time_active.avg                                                           msecond                           1.25
-    sm__warps_active.avg.per_cycle_active                                             warp                           1.99
-    ---------------------------------------------------------------------- --------------- ------------------------------
-
+==WARNING== No kernels were profiled.
+==WARNING== Profiling kernels launched by child processes requires the --target-processes all option.

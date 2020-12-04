@@ -1,2 +1,6 @@
-==WARNING== No kernels were profiled.
-==WARNING== Profiling kernels launched by child processes requires the --target-processes all option.
+==PROF== Connected to process 15838 (/home/ooreilly/codes/cuda/latency-hiding/readonly_profile)
+==PROF== Profiling "readonly_float4": 0%....50%....100% - 8 passes
+==PROF== Disconnected from process 15838
+[15838] readonly_profile@127.0.0.1
+  void readonly_float4<1>(float4*, unsigned long, unsigned int*, unsigned int*, unsigned int*, unsigned int*), 2020-Dec-04 00:28:17, Context 1, Stream 7
+    Section: Command line profiler metrics
