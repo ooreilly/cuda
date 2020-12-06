@@ -64,8 +64,8 @@ void read(int n, int l1max) {
 int main(int argc, char **argv) {
         if (argc != 2) {
                 printf("usage: %s <split> \n" \
-                       "split: 0 (64 KB L1 32 KB Shared memory) \n" \
-                       "       1 (32 KB L1, 64 KB Shared memory)\n", argv[0]);
+                       "split: 0 (32 KB L1, 64 KB Shared memory) \n" \
+                       "       1 (64 KB L1, 32 KB Shared memory)\n", argv[0]);
                 return -1;
         }
         int l1max = atoi(argv[1]);
