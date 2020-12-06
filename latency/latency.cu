@@ -5,6 +5,17 @@
 #include "kernel.cuh"
 #include <bits/stdc++.h>
 
+#define cudaErrCheck(call) {                                                  \
+  cudaError_t err = call;                                                     \
+  if( cudaSuccess != err) {                                                   \
+  fprintf(stderr, "CUDA error in %s:%i %s(): %s.\n",                          \
+          __FILE__, __LINE__, __func__, cudaGetErrorString(err) );            \
+  fflush(stderr);                                                             \
+  exit(EXIT_FAILURE);                                                         \
+  }                                                                           \
+}                                                                             
+
+
 
 using namespace std;
 
@@ -21,21 +32,17 @@ void read(int n, int l1max) {
         cudaMalloc((void**)&d_arr, num_bytes);
 
         if (!l1max) {
-                int maxbytes = 65536;  // 64 KB
-                cudaFuncSetAttribute(measure_latency,
-                                     cudaFuncAttributeMaxDynamicSharedMemorySize,
-                                     maxbytes);
                 int carveout = cudaSharedmemCarveoutMaxShared;
-                cudaFuncSetAttribute(
+                cudaErrCheck(cudaFuncSetAttribute(
                     measure_latency, cudaFuncAttributePreferredSharedMemoryCarveout,
-                    carveout);
+                    carveout));
         }
 
         int *d_latency, latency;
         cudaMalloc((void**)&d_latency, sizeof(int));
         cudaMemcpy(d_arr, arr.data(), num_bytes, cudaMemcpyHostToDevice);
 
-        int niter = 5e6;
+        int niter = 1e6;
 
         nvmlInit();
         nvmlDevice_t device;
@@ -64,7 +71,6 @@ int main(int argc, char **argv) {
         int l1max = atoi(argv[1]);
         printf("%4s %12s %12s %12s\n", "MHz", "B", "KB", "CPI");
         int m = 4;
-        int iter = 100;
 
         for (size_t n = 2; n < (1 << 25); n *= 2) {
                 for (int j = 0; j < m; ++j)
