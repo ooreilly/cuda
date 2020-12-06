@@ -15,11 +15,8 @@ void read(int n, int l1max) {
 
         vector<int> arr(n);
         for (int i = 0; i < n; ++i) {
-                arr[i] = i;
+                arr[i] = (i + 32) % n;  // stride by one cache line 128 B
         }
-    
-        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-        shuffle(begin(arr), end(arr) - 1, default_random_engine(seed));
 
         cudaMalloc((void**)&d_arr, num_bytes);
 
@@ -38,11 +35,7 @@ void read(int n, int l1max) {
         cudaMalloc((void**)&d_latency, sizeof(int));
         cudaMemcpy(d_arr, arr.data(), num_bytes, cudaMemcpyHostToDevice);
 
-        int niter = 1e6;
-
-        measure_latency<<<1, 1>>>(d_arr, 0, niter, d_latency);
-        cudaDeviceSynchronize();
-
+        int niter = 5e6;
 
         nvmlInit();
         nvmlDevice_t device;
@@ -70,7 +63,9 @@ int main(int argc, char **argv) {
         }
         int l1max = atoi(argv[1]);
         printf("%4s %12s %12s %12s\n", "MHz", "B", "KB", "CPI");
-        int m = 2;
+        int m = 4;
+        int iter = 100;
+
         for (size_t n = 2; n < (1 << 25); n *= 2) {
                 for (int j = 0; j < m; ++j)
                         read(n + j * n / m, l1max);

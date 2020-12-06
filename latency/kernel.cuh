@@ -12,6 +12,13 @@ __global__ void measure_latency(int *arr, int j, int niter, int *cpi) {
 
         #pragma unroll(unroll_factor)
         for (int it = 0; it < niter; it++) {
+                        j = arr[j];
+        }
+        if (idx > 32) arr[0] = j;
+
+
+        #pragma unroll(unroll_factor)
+        for (int it = 0; it < niter; it++) {
                         clock_t start = clock();
                         j = arr[j];
                         clock_t stop = clock();
