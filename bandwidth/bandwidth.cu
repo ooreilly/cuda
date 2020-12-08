@@ -13,11 +13,6 @@
 }                                                                             
 
 __global__ void bandwidth(float4 *a, size_t n) {
-      // int idx = threadIdx.x + blockDim.x * blockIdx.x;
-      // if (idx >= n) return;
-      // float4 reg = a[idx];
-      // if (reg.x == 1.0f) a[idx].x = 1.0f;
-
         size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
         for (size_t i = idx; i < n; i += blockDim.x * gridDim.x) {
                 if (a[i].x == 1.0f) a[i].x = 1.0;
@@ -39,10 +34,6 @@ float bandwidth_H(float4 *d_x, size_t n, int num_SM, size_t shared_mem_bytes, si
         int threads = 32 * warps_per_block;
         int blocks = num_SM * max_active_warps(shared_mem_bytes, warps_per_block);
 
-        int maxbytes = 65536;  // 64 KB
-        cudaFuncSetAttribute(bandwidth, 
-                             cudaFuncAttributeMaxDynamicSharedMemorySize,
-                             maxbytes);
         int carveout = cudaSharedmemCarveoutMaxShared;
         cudaErrCheck(cudaFuncSetAttribute(
             bandwidth, cudaFuncAttributePreferredSharedMemoryCarveout,
@@ -86,7 +77,9 @@ int main(int argc, char **argv) {
 
         float cache_lines_per_thread = (float)bytes_per_thread / cache_line_size;
 
-        printf("Block size \t Shared memory \t Warps per SM \t Cache lines per SM \t Bytes in flight per SM \t Bandwidth (GB/s)\n");
+        printf(
+            "Block size \t Shared memory \t Warps per SM \t Cache lines per SM "
+            "\t Bytes in flight per SM \t Bandwidth (GB/s)\n");
 
         // Number of warps per block
         for (int warps = 1; warps <= 3; ++warps) {
