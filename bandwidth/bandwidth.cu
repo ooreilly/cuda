@@ -78,18 +78,19 @@ int main(int argc, char **argv) {
         cudaDeviceGetAttribute(&num_SM, cudaDevAttrMultiProcessorCount, device);
 
         // Pick a large problem size that is evenly divisible by the number of SMs
-        size_t n = 2 * 2097152 * num_SM;
+        size_t n = (1 << 22) * num_SM;
 
         float4 *d_x;
         cudaMalloc((void**)&d_x, bytes_per_thread * n);
+        cudaMemset(d_x, 0, bytes_per_thread * n);
 
         float cache_lines_per_thread = (float)bytes_per_thread / cache_line_size;
 
         printf("Block size \t Shared memory \t Warps per SM \t Cache lines per SM \t Bytes in flight per SM \t Bandwidth (GB/s)\n");
 
-        int last_occupancy = 0;
         // Number of warps per block
-        for (int warps = 1; warps <= 16; ++warps) {
+        for (int warps = 1; warps <= 3; ++warps) {
+                int last_occupancy = 0;
                 // Adjust shared memory to control occupancy
                 for (int shared_mem_bytes = (1 << 16); shared_mem_bytes >= 0;
                      shared_mem_bytes -= 128) {
@@ -109,7 +110,7 @@ int main(int argc, char **argv) {
                         // Effective bandwidth in GB/s
                         const float bandwidth = n  * bytes_per_thread / latency / 1e6;
 
-                        printf("%10d \t %13d \t %12d \t %18f \t %22f \t %f \n", 
+                        printf("%10d \t %13d \t %12d \t %18f \t %22f \t %16f \n", 
                                 warp_size * warps, 
                                 shared_mem_bytes,
                                 occupancy,
