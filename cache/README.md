@@ -5,7 +5,7 @@ latencies.
 The program runs on a single thread and block. The thread consequentially accesses array elements with a 4B stride
 and returns the latency in clock cycles for each access.
  
-Example output:
+Example output obtained on a RTX 2080 Ti card (Turing):
 ```
 ./cache 1
 519 33 33 33 33 33 33 33 133 33 33 33 33 33 33 33 227 33 33 33 33 33 33 33 133 33 33 33 33 33 33 33 227 33 33 33 33 33 33 33 133 33 33 33 33 33 33 33 227 33 33 33 33 33 33 33 134 33 33 33 33 33 33 33

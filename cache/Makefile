@@ -8,4 +8,3 @@ run:
 
 clean:
 	rm -f cache
-	rm -f cpi.txt
